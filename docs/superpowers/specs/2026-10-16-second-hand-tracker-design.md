@@ -109,7 +109,7 @@ Vercel.
 | `id` | uuid PK | |
 | `store_id` | uuid FK → stores ON DELETE CASCADE | |
 | `kind` | enum | `weekly`, `every_n_weeks`, `monthly_nth`, `irregular` |
-| `weekday` | smallint 0–6 NULL | потрібне для всіх, крім `irregular` |
+| `weekday` | smallint 0–6 NULL | 0 = понеділок, як в `opening_hours`; потрібне для всіх, крім `irregular` |
 | `interval_weeks` | smallint NULL | лише `every_n_weeks`, ≥ 2 |
 | `anchor_date` | date NULL | лише `every_n_weeks`: дата відомого завозу, задає фазу |
 | `nth` | smallint NULL | лише `monthly_nth`: 1–4, або -1 = останній |
