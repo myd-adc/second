@@ -1,5 +1,5 @@
 import type { DayHours } from "../opening-hours";
-import type { DeliveryEvent, Rule } from "../schedule/types";
+import type { DeliveryEvent, ISODate, Rule } from "../schedule/types";
 
 export type RuleRow = {
   id: string;
@@ -31,4 +31,13 @@ export type StoreInput = {
   notes?: string | null;
   hours: DayHours[];
   rules: Array<{ rule: Rule; isActive: boolean; timeOfDay?: string | null; note?: string }>;
+};
+
+export type JournalEntry = {
+  id: string;
+  date: ISODate;
+  happened: boolean;
+  note: string | null;
+  reporterName: string;
+  reportedByMe: boolean;
 };

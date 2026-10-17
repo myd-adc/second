@@ -1,6 +1,6 @@
 import type { DayHours } from "../opening-hours";
 import type { DeliveryEvent, ISODate, Rule } from "../schedule/types";
-import type { RuleRow, StoreInput } from "./types";
+import type { JournalEntry, RuleRow, StoreInput } from "./types";
 
 // Pure row <-> domain mapping. DB snake_case never leaves lib/db.
 
@@ -123,4 +123,28 @@ export function mergeEventsByDate(events: DeliveryEvent[]): DeliveryEvent[] {
     else byDate.set(e.date, { date: e.date, happened: e.happened });
   }
   return [...byDate.values()];
+}
+
+type ProfileEmbed = { display_name: string | null };
+export type DbJournalRow = {
+  id: string;
+  date: string;
+  happened: boolean;
+  note: string | null;
+  reported_by: string;
+  // PostgREST returns a to-one embed as an object (an array in some typings)
+  profiles: ProfileEmbed | ProfileEmbed[] | null;
+};
+
+export function journalEntryFromRow(row: DbJournalRow, currentUserId: string | null): JournalEntry {
+  const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  const name = profile?.display_name?.trim();
+  return {
+    id: row.id,
+    date: row.date,
+    happened: row.happened,
+    note: row.note,
+    reporterName: name ? name : "Хтось",
+    reportedByMe: currentUserId !== null && row.reported_by === currentUserId,
+  };
 }

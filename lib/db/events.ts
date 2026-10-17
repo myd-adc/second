@@ -2,7 +2,8 @@ import { addDays } from "../schedule/dates";
 import { todayInKyiv } from "../schedule/today";
 import type { DeliveryEvent, ISODate } from "../schedule/types";
 import { getDb, unwrap, type Db } from "./client";
-import { eventFromRow, mergeEventsByDate, type DbEventRow } from "./mappers";
+import { eventFromRow, journalEntryFromRow, mergeEventsByDate, type DbEventRow, type DbJournalRow } from "./mappers";
+import type { JournalEntry } from "./types";
 
 const WINDOW_DAYS = 200;
 const PAGE = 1000; // PostgREST caps a response at 1000 rows by default
@@ -55,4 +56,23 @@ export async function markDelivery(
     { onConflict: "store_id,date,reported_by" },
   );
   if (res.error) throw new Error(`mark delivery: ${res.error.message}`);
+}
+
+/** Latest per-report entries of a store (newest first) with the reporter's display name. */
+export async function getJournal(storeId: string, limit = 10): Promise<JournalEntry[]> {
+  const db = await getDb();
+  const [rows, user] = await Promise.all([
+    db
+      .from("delivery_events")
+      // to-one embed through the delivery_events.reported_by -> profiles.id FK
+      .select("id, date, happened, note, reported_by, profiles!reported_by(display_name)")
+      .eq("store_id", storeId)
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    db.auth.getUser(),
+  ]);
+  const data = unwrap(rows, "load journal") as unknown as DbJournalRow[];
+  const me = user.data.user?.id ?? null;
+  return data.map((r) => journalEntryFromRow(r, me));
 }

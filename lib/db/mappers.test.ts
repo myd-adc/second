@@ -3,6 +3,7 @@ import {
   eventFromRow,
   hoursFromRows,
   hoursToRows,
+  journalEntryFromRow,
   mergeEventsByDate,
   ruleFromRow,
   ruleToRow,
@@ -193,5 +194,37 @@ describe("mergeEventsByDate", () => {
     expect(
       mergeEventsByDate([e("2026-10-03", false), e("2026-10-02", true), e("2026-10-03", true), e("2026-10-01", false)]),
     ).toEqual([e("2026-10-03", true), e("2026-10-02", true), e("2026-10-01", false)]);
+  });
+});
+
+describe("journalEntryFromRow", () => {
+  const row = {
+    id: "e1",
+    date: "2026-10-10",
+    happened: true,
+    note: "зранку",
+    reported_by: "u1",
+    profiles: { display_name: "Оля" },
+  };
+  it("maps a row and flags own entries", () => {
+    expect(journalEntryFromRow(row, "u1")).toEqual({
+      id: "e1",
+      date: "2026-10-10",
+      happened: true,
+      note: "зранку",
+      reporterName: "Оля",
+      reportedByMe: true,
+    });
+    expect(journalEntryFromRow(row, "u2").reportedByMe).toBe(false);
+    expect(journalEntryFromRow(row, null).reportedByMe).toBe(false);
+  });
+  it("falls back to «Хтось» when the profile is missing or blank", () => {
+    expect(journalEntryFromRow({ ...row, profiles: null }, "u2").reporterName).toBe("Хтось");
+    expect(journalEntryFromRow({ ...row, profiles: { display_name: "  " } }, "u2").reporterName).toBe("Хтось");
+  });
+  it("accepts an embed returned as a one-element array and a null note", () => {
+    const r = journalEntryFromRow({ ...row, note: null, profiles: [{ display_name: "Іра" }] }, "u2");
+    expect(r.reporterName).toBe("Іра");
+    expect(r.note).toBeNull();
   });
 });
