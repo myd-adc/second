@@ -14,16 +14,20 @@ function isPublic(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { url, anonKey } = supabaseEnv();
   let response = NextResponse.next({ request });
+  // cache-control headers from @supabase/ssr (private, no-store...) must reach every response that sets cookies
+  let ssrHeaders: Record<string, string> = {};
 
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet, headers) {
         for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
         response = NextResponse.next({ request });
         for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
+        ssrHeaders = { ...ssrHeaders, ...headers };
+        for (const [k, v] of Object.entries(ssrHeaders)) response.headers.set(k, v);
       },
     },
   });
@@ -42,6 +46,7 @@ export async function proxy(request: NextRequest) {
     const redirect = NextResponse.redirect(target);
     // keep refreshed session cookies on the redirect
     for (const c of response.cookies.getAll()) redirect.cookies.set(c);
+    for (const [k, v] of Object.entries(ssrHeaders)) redirect.headers.set(k, v);
     return redirect;
   };
 
