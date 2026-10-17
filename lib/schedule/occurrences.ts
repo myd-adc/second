@@ -6,7 +6,7 @@ function pad(n: number): string {
 }
 
 /** nth (1-4) or last (-1) given weekday of a month; month is 1-12. */
-function nthWeekdayOfMonth(year: number, month: number, weekday: number, nth: number): ISODate {
+export function nthWeekdayOfMonth(year: number, month: number, weekday: number, nth: number): ISODate {
   const first: ISODate = `${String(year).padStart(4, "0")}-${pad(month)}-01`;
   if (nth > 0) {
     const offset = (weekday - weekdayOf(first) + 7) % 7;
