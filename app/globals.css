@@ -177,3 +177,138 @@ h1 {
   display: flex;
   justify-content: center;
 }
+
+h2 {
+  margin: 24px 0 8px;
+  font-size: 1.05rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.meta {
+  margin: 0 0 8px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+.hours li {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.hours-today {
+  background: var(--soon-bg);
+  color: var(--soon-fg);
+  font-weight: 700;
+}
+
+.mark {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mark-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-big {
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-yes {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.btn-no {
+  background: transparent;
+  color: var(--accent);
+}
+
+.btn-big:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.mark-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.field input {
+  min-height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-width: 100%;
+}
+
+.mark-error {
+  margin: 0;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.mark-error::before {
+  content: "\26A0\FE0E  ";
+}
+
+.mark-ok {
+  margin: 0;
+  color: var(--open);
+  font-weight: 600;
+}
+
+.mark-ok::before {
+  content: "\2713  ";
+}

@@ -1,15 +1,9 @@
 import Link from "next/link";
 import type { StoreOverview } from "@/lib/schedule/overview";
-
-function badge(daysUntil: number | null): { text: string; className: string } {
-  if (daysUntil === null) return { text: "немає прогнозу", className: "badge badge-none" };
-  if (daysUntil === 0) return { text: "ЗАВІЗ СЬОГОДНІ", className: "badge badge-today" };
-  if (daysUntil === 1) return { text: "завтра", className: "badge badge-soon" };
-  return { text: `через ${daysUntil} дн.`, className: "badge badge-soon" };
-}
+import { deliveryBadge } from "./deliveryBadge";
 
 export default function StoreRow({ store }: { store: StoreOverview }) {
-  const b = badge(store.daysUntil);
+  const b = deliveryBadge(store.daysUntil);
   const c = store.confidence;
   return (
     <li>
