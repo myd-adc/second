@@ -59,6 +59,14 @@ export async function markDelivery(
   if (res.error) throw new Error(`mark delivery: ${res.error.message}`);
 }
 
+/** Remove one journal entry. RLS lets only its author delete, so a foreign/missing row shows up as 0 rows. */
+export async function deleteDelivery(id: string): Promise<void> {
+  const db = await getDb();
+  const res = await db.from("delivery_events").delete().eq("id", id).select("id");
+  if (res.error) throw new Error(`delete delivery: ${res.error.message}`);
+  if (res.data.length === 0) throw new Error("delete delivery: not found or not your entry");
+}
+
 /** Latest per-report entries of a store (newest first) with the reporter's display name. */
 export async function getJournal(storeId: string, limit = 10): Promise<JournalEntry[]> {
   const db = await getDb();

@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { todayInKyiv } from "@/lib/schedule/today";
 import { markDeliveryAction, type MarkResult } from "../actions";
 
 export default function MarkButtons({ storeId, today }: { storeId: string; today: string }) {
-  const [date, setDate] = useState(today);
+  // `today` is frozen at render; a tab left open past midnight would otherwise default to / cap at yesterday.
+  // `date === ""` means "not picked": resolved to a fresh Kyiv today at tap time; `max` is refreshed on tap and focus.
+  const [date, setDate] = useState("");
+  const [max, setMax] = useState(today);
   const [note, setNote] = useState("");
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<MarkResult | null>(null);
 
   function mark(happened: boolean) {
     setResult(null);
+    const fresh = todayInKyiv(new Date());
+    setMax(fresh);
     startTransition(async () => {
       try {
-        const res = await markDeliveryAction(storeId, happened, date || today, note);
+        const res = await markDeliveryAction(storeId, happened, date || fresh, note);
         setResult(res);
         if (res.ok) setNote("");
       } catch {
@@ -35,7 +41,13 @@ export default function MarkButtons({ storeId, today }: { storeId: string; today
       <div className="mark-fields">
         <label className="field">
           <span>Дата</span>
-          <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} />
+          <input
+            type="date"
+            value={date || max}
+            max={max}
+            onFocus={() => setMax(todayInKyiv(new Date()))}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </label>
         <label className="field">
           <span>Нотатка (необов’язково)</span>

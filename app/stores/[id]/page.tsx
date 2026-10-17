@@ -8,6 +8,7 @@ import { kyivParts } from "@/lib/opening-hours";
 import { formatDayHours } from "@/lib/opening-hours/format";
 import { buildOverview, ruleLabel } from "@/lib/schedule/overview";
 import { todayInKyiv } from "@/lib/schedule/today";
+import CancelMarkButton from "./_components/CancelMarkButton";
 import MarkButtons from "./_components/MarkButtons";
 
 export const dynamic = "force-dynamic";
@@ -100,6 +101,7 @@ export default async function StorePage({ params }: { params: Promise<{ id: stri
               {e.reporterName}
               {e.reportedByMe && " (ти)"} · {ddmm(e.date)} · {e.happened ? "завіз був" : "завозу не було"}
               {e.note && <span className="row-meta"> — {e.note}</span>}
+              {e.reportedByMe && <CancelMarkButton storeId={store.id} entryId={e.id} />}
             </li>
           ))}
         </ul>

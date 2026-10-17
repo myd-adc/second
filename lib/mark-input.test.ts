@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMarkInput } from "./mark-input";
+import { parseDeleteInput, parseMarkInput } from "./mark-input";
 
 const ID = "3f2b8c1e-5a4d-4e8f-9b0a-1c2d3e4f5a6b";
 const TODAY = "2026-10-17";
@@ -40,5 +40,17 @@ describe("parseMarkInput", () => {
       ok: false,
       error: "Нотатка задовга (макс. 200 символів)",
     });
+  });
+});
+
+describe("parseDeleteInput", () => {
+  it("accepts two UUIDs", () => {
+    expect(parseDeleteInput(ID, ID.toUpperCase())).toEqual({ ok: true, value: { storeId: ID, entryId: ID.toUpperCase() } });
+  });
+  it("rejects a bad store id or entry id with a Ukrainian message", () => {
+    expect(parseDeleteInput("nope", ID)).toEqual({ ok: false, error: "Некоректний магазин" });
+    expect(parseDeleteInput(ID, "nope")).toEqual({ ok: false, error: "Некоректний запис" });
+    expect(parseDeleteInput(ID, undefined)).toEqual({ ok: false, error: "Некоректний запис" });
+    expect(parseDeleteInput(null, ID).ok).toBe(false);
   });
 });

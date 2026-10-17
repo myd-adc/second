@@ -28,3 +28,11 @@ export function parseMarkInput(input: MarkInput, today: ISODate): MarkParsed {
   if (trimmed.length > MAX_NOTE) return { ok: false, error: "Нотатка задовга (макс. 200 символів)" };
   return { ok: true, value: { storeId: input.storeId, date, note: trimmed === "" ? null : trimmed } };
 }
+
+export type DeleteParsed = { ok: true; value: { storeId: string; entryId: string } } | { ok: false; error: string };
+
+export function parseDeleteInput(storeId: unknown, entryId: unknown): DeleteParsed {
+  if (typeof storeId !== "string" || !isUuid(storeId)) return { ok: false, error: "Некоректний магазин" };
+  if (typeof entryId !== "string" || !isUuid(entryId)) return { ok: false, error: "Некоректний запис" };
+  return { ok: true, value: { storeId, entryId } };
+}
