@@ -25,11 +25,14 @@ port = 54324
 [auth]
 enabled = true
 site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["http://127.0.0.1:3000/auth/callback"]
+additional_redirect_urls = ["http://127.0.0.1:3000/auth/callback", "http://localhost:3000/auth/callback"]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false
 enable_manual_linking = false
+
+[auth.rate_limit]
+email_sent = 1000
 
 [auth.email]
 # magic link / OTP only: no password sign-in
@@ -38,7 +41,8 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 secure_password_change = true
-max_frequency = "1m0s"
+# local only: e2e logs in several times a minute (production limits are set in the hosted dashboard)
+max_frequency = "1s"
 otp_length = 6
 otp_expiry = 3600
 
