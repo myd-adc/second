@@ -1,17 +1,15 @@
 import type { ISODate } from "./schedule/types";
+import { isUuid } from "./uuid";
+
+export { isUuid };
 
 export type MarkInput = { storeId: string; date?: string; note?: string };
 export type MarkParsed =
   | { ok: true; value: { storeId: string; date: ISODate; note: string | null } }
   | { ok: false; error: string };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 export const MAX_NOTE = 200;
-
-export function isUuid(s: string): boolean {
-  return UUID.test(s);
-}
 
 function isRealDate(s: string): boolean {
   const m = ISO.exec(s);
