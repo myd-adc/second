@@ -201,6 +201,20 @@ export default function StoreForm({ initial, today }: { initial?: FormState; tod
         />
       </div>
 
+      <div className="field">
+        <label htmlFor={`${uid}-coords`}>Координати (широта, довгота)</label>
+        <input
+          id={`${uid}-coords`}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          placeholder="50.4501, 30.5234"
+          value={state.coordinates}
+          onChange={(e) => patch({ coordinates: e.target.value })}
+        />
+        <span className="row-meta">Скопіюй з Google Maps: довгий тап по точці</span>
+      </div>
+
       <h2>Години роботи</h2>
       <ul className="plain hours-edit">
         {DAYS.map((d, i) => {

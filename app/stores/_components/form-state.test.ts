@@ -53,6 +53,28 @@ describe("form-state", () => {
     expect(validateStoreInput(toPayload({ ...emptyFormState(), name: "x", rules: [rule] })).ok).toBe(false);
   });
 
+  it("coordinates text is parsed into lat/lng; blank means none", () => {
+    const base = { ...emptyFormState(), name: "Бук" };
+    expect(toPayload({ ...base, coordinates: " 50.4501,  30.5234 " })).toMatchObject({ lat: 50.4501, lng: 30.5234 });
+    expect(toPayload({ ...base, coordinates: "" })).toMatchObject({ lat: null, lng: null });
+    const r = validateStoreInput(JSON.parse(JSON.stringify(toPayload({ ...base, coordinates: "-12.5 77" }))));
+    expect(r.ok && r.value).toMatchObject({ lat: -12.5, lng: 77 });
+  });
+
+  it("invalid coordinates text is a clear validation error, not a silent drop", () => {
+    for (const coordinates of ["50.4501", "95, 30", "abc"]) {
+      const r = validateStoreInput(JSON.parse(JSON.stringify(toPayload({ ...emptyFormState(), name: "Бук", coordinates }))));
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.error).toContain("Координати");
+    }
+  });
+
+  it("formStateFromStore prefills coordinates from stored lat/lng", () => {
+    const store = { id: "3f2b8c1e-5a4d-4e8f-9b0a-1c2d3e4f5a6b", name: "Бук", address: null, lat: 50.1, lng: 30.2, notes: null, createdBy: "u", hours: [], rules: [], events: [] };
+    expect(formStateFromStore(store).coordinates).toBe("50.1, 30.2");
+    expect(formStateFromStore({ ...store, lat: null, lng: null }).coordinates).toBe("");
+  });
+
   it("formStateFromStore keeps all rules (incl. inactive), id, lat/lng; missing hours default open 10-19", () => {
     const store: StoreWithDetails = {
       id: "3f2b8c1e-5a4d-4e8f-9b0a-1c2d3e4f5a6b",

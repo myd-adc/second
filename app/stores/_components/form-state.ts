@@ -1,3 +1,4 @@
+import { formatCoordinates, parseCoordinates } from "@/lib/coordinates";
 import type { StoreWithDetails } from "@/lib/db/types";
 import { weekdayOf } from "@/lib/schedule/dates";
 import type { ISODate } from "@/lib/schedule/types";
@@ -23,8 +24,7 @@ export type FormState = {
   name: string;
   address: string;
   notes: string;
-  lat: number | null;
-  lng: number | null;
+  coordinates: string; // raw "lat, lng" text; parsed in toPayload
   hours: HoursState[]; // index = weekday (0 = Monday)
   rules: RuleState[];
 };
@@ -37,8 +37,7 @@ export function emptyFormState(): FormState {
     name: "",
     address: "",
     notes: "",
-    lat: null,
-    lng: null,
+    coordinates: "",
     hours: Array.from({ length: 7 }, () => ({ ...DEFAULT_HOURS })),
     rules: [],
   };
@@ -86,8 +85,7 @@ export function formStateFromStore(store: StoreWithDetails): FormState {
     name: store.name,
     address: store.address ?? "",
     notes: store.notes ?? "",
-    lat: store.lat,
-    lng: store.lng,
+    coordinates: formatCoordinates(store.lat, store.lng),
     hours,
     rules,
   };
@@ -114,13 +112,16 @@ function ruleToPayload(r: RuleState): unknown {
 
 /** Serialisable object for the hidden `payload` field; the server re-validates everything. */
 export function toPayload(s: FormState): Record<string, unknown> {
+  const coords = parseCoordinates(s.coordinates);
   return {
     ...(s.id ? { id: s.id } : {}),
     name: s.name,
     address: s.address,
     notes: s.notes,
-    lat: s.lat,
-    lng: s.lng,
+    lat: coords === null || coords === "invalid" ? null : coords.lat,
+    lng: coords === null || coords === "invalid" ? null : coords.lng,
+    // the server turns this into a visible validation error instead of silently dropping the text
+    ...(coords === "invalid" ? { coordinatesInvalid: true } : {}),
     hours: s.hours.map((h, weekday) => ({
       weekday,
       isClosed: h.closed,

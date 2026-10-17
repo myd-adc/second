@@ -68,6 +68,8 @@ export function validateStoreInput(payload: unknown): StoreParsed {
     id = p.id;
   }
 
+  if (p.coordinatesInvalid === true)
+    return fail("Координати: вкажи два числа через кому, наприклад 50.4501, 30.5234 (широта від -90 до 90, довгота від -180 до 180)");
   const hasLat = p.lat !== undefined && p.lat !== null;
   const hasLng = p.lng !== undefined && p.lng !== null;
   if (hasLat !== hasLng) return fail("Вкажи і широту, і довготу");
