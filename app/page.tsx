@@ -1,20 +1,10 @@
 import Link from "next/link";
-import { TIMEZONE } from "@/lib/config";
 import { listStores } from "@/lib/db/stores";
 import { buildOverview } from "@/lib/schedule/overview";
+import { formatTodayHeader } from "@/lib/schedule/today";
 import StoreRow from "./_components/StoreRow";
 
 export const dynamic = "force-dynamic";
-
-function heading(now: Date): string {
-  const f = new Intl.DateTimeFormat("uk-UA", {
-    timeZone: TIMEZONE,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-  return `Сьогодні, ${f.format(now)}`;
-}
 
 export default async function Home() {
   const now = new Date();
@@ -22,7 +12,7 @@ export default async function Home() {
 
   return (
     <main className="page">
-      <h1>{heading(now)}</h1>
+      <h1>{formatTodayHeader(now)}</h1>
       {overview.length === 0 ? (
         <div className="empty">
           <p>Магазинів ще немає</p>
