@@ -89,3 +89,32 @@ describe("tail of a closed today", () => {
     expect(isOpenAt(hours, kyiv("2026-10-13T01:00:00"))).toBe(true);
   });
 });
+
+// Kyiv leaves DST on Sunday 2026-10-25: at 04:00 EEST (UTC+3) clocks go back to 03:00 EET (UTC+2), i.e. at 01:00Z.
+// So 03:00-03:59 local happens twice: 00:00Z-01:00Z (still +3) and 01:00Z-02:00Z (already +2).
+describe("DST end 2026-10-25", () => {
+  it("kyivParts of both 03:30 instants", () => {
+    expect(kyivParts(new Date("2026-10-25T00:30:00Z"))).toEqual({ date: "2026-10-25", weekday: 6, minutes: 210 });
+    expect(kyivParts(new Date("2026-10-25T01:30:00Z"))).toEqual({ date: "2026-10-25", weekday: 6, minutes: 210 });
+  });
+  it("Saturday 22:00-02:00 tail: open at 01:30 EEST, closed from 02:00 and in the repeated hour", () => {
+    const hours = [day(5, "22:00", "02:00")];
+    expect(isOpenAt(hours, new Date("2026-10-24T22:30:00Z"))).toBe(true); // Sun 01:30 EEST
+    expect(isOpenAt(hours, new Date("2026-10-24T23:00:00Z"))).toBe(false); // Sun 02:00 EEST
+    expect(isOpenAt(hours, new Date("2026-10-25T00:30:00Z"))).toBe(false); // Sun 03:30 EEST
+    expect(isOpenAt(hours, new Date("2026-10-25T01:30:00Z"))).toBe(false); // Sun 03:30 EET
+  });
+  it("Sunday 00:00-02:00: open at 00:30, closed at 02:00 and in the repeated 03:30", () => {
+    const hours = [day(6, "00:00", "02:00")];
+    expect(isOpenAt(hours, new Date("2026-10-24T21:00:00Z"))).toBe(true); // Sun 00:00 EEST
+    expect(isOpenAt(hours, new Date("2026-10-24T21:30:00Z"))).toBe(true); // Sun 00:30 EEST
+    expect(isOpenAt(hours, new Date("2026-10-24T23:00:00Z"))).toBe(false); // Sun 02:00 EEST
+    expect(isOpenAt(hours, new Date("2026-10-25T00:30:00Z"))).toBe(false);
+  });
+  it("Sunday 00:00-04:00 is open in both passes of 03:30 and closed at 04:00 EET", () => {
+    const hours = [day(6, "00:00", "04:00")];
+    expect(isOpenAt(hours, new Date("2026-10-25T00:30:00Z"))).toBe(true);
+    expect(isOpenAt(hours, new Date("2026-10-25T01:30:00Z"))).toBe(true);
+    expect(isOpenAt(hours, new Date("2026-10-25T02:00:00Z"))).toBe(false); // 04:00 EET
+  });
+});

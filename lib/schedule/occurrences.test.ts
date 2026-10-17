@@ -41,6 +41,22 @@ describe("nextOccurrences", () => {
     const r: Rule = { kind: "monthly_nth", weekday: 3, nth: 4 };
     expect(nextOccurrences(r, "2026-12-25", 2)).toEqual(["2027-01-28", "2027-02-25"]);
   });
+  // Oct 2026 Thursdays: 1, 8, 15, 22, 29; Nov 2026 Thursdays: 5, 12, 19, 26
+  it("monthly_nth second Thursday", () => {
+    expect(nextOccurrences({ kind: "monthly_nth", weekday: 3, nth: 2 }, "2026-10-01", 2)).toEqual(["2026-10-08", "2026-11-12"]);
+  });
+  it("monthly_nth third Thursday", () => {
+    expect(nextOccurrences({ kind: "monthly_nth", weekday: 3, nth: 3 }, "2026-10-01", 2)).toEqual(["2026-10-15", "2026-11-19"]);
+  });
+  it("monthly_nth fourth Thursday", () => {
+    expect(nextOccurrences({ kind: "monthly_nth", weekday: 3, nth: 4 }, "2026-10-01", 2)).toEqual(["2026-10-22", "2026-11-26"]);
+  });
+  it("every_n_weeks with an anchor years in the past", () => {
+    // anchor Wed 2024-01-03 + 1008 days (48 x 3 weeks) = Wed 2026-10-07 is on phase, so the next one is 2026-10-28
+    const r: Rule = { kind: "every_n_weeks", weekday: 2, intervalWeeks: 3, anchorDate: "2024-01-03" };
+    expect(nextOccurrences(r, "2026-10-14", 2)).toEqual(["2026-10-28", "2026-11-18"]);
+    expect(nextOccurrences(r, "2026-10-07", 1)).toEqual(["2026-10-07"]);
+  });
   it("irregular returns empty", () => {
     expect(nextOccurrences({ kind: "irregular" }, "2026-10-12", 3)).toEqual([]);
   });

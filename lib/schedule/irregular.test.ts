@@ -31,4 +31,14 @@ describe("predictIrregular", () => {
     // only 2 distinct dates -> not enough facts
     expect(predictIrregular([ev("2026-09-01"), ev("2026-09-08"), ev("2026-09-08")], "2026-09-16")).toBeNull();
   });
+  it("with exactly 5 facts uses all four intervals", () => {
+    // intervals 7, 7, 14, 14 -> even count: floor((7 + 14 + 1) / 2) = 11; 2026-09-14 + 11
+    const facts = ["2026-08-03", "2026-08-10", "2026-08-17", "2026-08-31", "2026-09-14"].map((d) => ev(d));
+    expect(predictIrregular(facts, "2026-09-15")).toBe("2026-09-25");
+  });
+  it("with 6+ facts only the last 5 count", () => {
+    // 2026-07-01 -> 2026-08-03 is 33 days; if it leaked in, intervals 7,7,14,14,33 would give median 14 (-> 09-28)
+    const facts = ["2026-07-01", "2026-08-03", "2026-08-10", "2026-08-17", "2026-08-31", "2026-09-14"].map((d) => ev(d));
+    expect(predictIrregular(facts, "2026-09-15")).toBe("2026-09-25");
+  });
 });
