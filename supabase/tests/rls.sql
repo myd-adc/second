@@ -6,11 +6,14 @@ begin;
 create temp table _res (ok boolean, name text);
 grant all on _res to anon, authenticated;
 
-insert into auth.users (id, instance_id, aud, role, email) values
-  ('11111111-1111-1111-1111-111111111111','00000000-0000-0000-0000-000000000000','authenticated','authenticated','a@rls.test'),
-  ('22222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-000000000000','authenticated','authenticated','b@rls.test'),
-  ('33333333-3333-3333-3333-333333333333','00000000-0000-0000-0000-000000000000','authenticated','authenticated','x@rls.test');
-insert into public.allowed_emails (email) values ('a@rls.test'), ('b@rls.test');
+insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at) values
+  ('11111111-1111-1111-1111-111111111111','00000000-0000-0000-0000-000000000000','authenticated','authenticated','a@rls.test', now()),
+  ('22222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-000000000000','authenticated','authenticated','b@rls.test', now()),
+  ('33333333-3333-3333-3333-333333333333','00000000-0000-0000-0000-000000000000','authenticated','authenticated','x@rls.test', now()),
+  ('44444444-4444-4444-4444-444444444444','00000000-0000-0000-0000-000000000000','authenticated','authenticated','u@rls.test', null),
+  ('55555555-5555-5555-5555-555555555555','00000000-0000-0000-0000-000000000000','authenticated','authenticated','n@rls.test', now());
+delete from public.profiles where id = '55555555-5555-5555-5555-555555555555';
+insert into public.allowed_emails (email) values ('a@rls.test'), ('b@rls.test'), ('u@rls.test');
 
 -- helper: run statement as role/user; record pass if it behaves as expected
 create function pg_temp.act_as(uid text, em text) returns void language plpgsql as $$
@@ -60,6 +63,12 @@ select pg_temp.act_as('33333333-3333-3333-3333-333333333333', 'x@rls.test');
 select pg_temp.expect('b1 non-allowed sees 0 stores', 'select * from public.stores', 'rows=0');
 select pg_temp.expect('b2 non-allowed cannot insert store', $q$insert into public.stores(name, created_by) values ('x','33333333-3333-3333-3333-333333333333')$q$, 'error');
 select pg_temp.expect('b3 non-allowed sees 0 profiles', 'select * from public.profiles', 'rows=0');
+select pg_temp.act_as('44444444-4444-4444-4444-444444444444', 'u@rls.test');
+select pg_temp.expect('b4 whitelisted but UNCONFIRMED email sees 0 stores', 'select * from public.stores', 'rows=0');
+select pg_temp.expect('b5 whitelisted but UNCONFIRMED email cannot insert', $q$insert into public.stores(name, created_by) values ('x','44444444-4444-4444-4444-444444444444')$q$, 'error');
+select pg_temp.expect('b6 unconfirmed: is_allowed() is false', 'select 1 where public.is_allowed()', 'rows=0');
+select pg_temp.act_as('33333333-3333-3333-3333-333333333333', 'a@rls.test');
+select pg_temp.expect('b7 forged email claim (uid not whitelisted) denied', 'select * from public.stores', 'rows=0');
 reset role;
 
 -- (c) allowed user A
@@ -76,10 +85,12 @@ select pg_temp.expect('c8 insert event reported_by=other rejected', $q$insert in
 select pg_temp.expect('c9 update own event', $q$update public.delivery_events set note='x' where date='2026-10-02'$q$, 'ok');
 select pg_temp.expect('c10 cannot reassign store created_by', $q$update public.stores set created_by='22222222-2222-2222-2222-222222222222' where id='aaaaaaaa-0000-0000-0000-000000000001'$q$, 'error');
 select pg_temp.expect('c11 insert opening_hours', $q$insert into public.opening_hours(store_id, weekday, opens, closes) values ('aaaaaaaa-0000-0000-0000-000000000001',0,'10:00','20:00')$q$, 'ok');
-select pg_temp.expect('c12 insert own profile id only', $q$insert into public.profiles(id, display_name) values ('22222222-2222-2222-2222-222222222222','hax')$q$, 'error');
+select pg_temp.expect('c12 cannot create profile for another user (no profile exists)', $q$insert into public.profiles(id, display_name) values ('55555555-5555-5555-5555-555555555555','hax')$q$, 'error');
 select pg_temp.expect('c13 allowed reads profiles', $q$select * from public.profiles where id::text ~ '^(1|2|3)\1{7}-'$q$, 'rows=3');
 reset role;
-select pg_temp.expect('c14 updated_at trigger advances', $q$select 1 from public.stores where id='aaaaaaaa-0000-0000-0000-000000000001' and updated_at >= created_at$q$, 'rows=1');
+update public.stores set created_at = created_at - interval '1 day', updated_at = created_at - interval '1 day' where id='aaaaaaaa-0000-0000-0000-000000000001';
+update public.stores set name = 'store A2' where id='aaaaaaaa-0000-0000-0000-000000000001';
+select pg_temp.expect('c14 updated_at trigger advances', $q$select 1 from public.stores where id='aaaaaaaa-0000-0000-0000-000000000001' and updated_at > created_at + interval '12 hours'$q$, 'rows=1');
 
 -- (d) delete rights
 set local role authenticated;

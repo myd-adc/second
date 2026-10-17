@@ -134,13 +134,17 @@ create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
--- access check
+-- access check: the signed-in user must have a CONFIRMED auth.users row whose email is
+-- whitelisted (does not trust the JWT email claim alone).
 create function public.is_allowed() returns boolean
 language sql stable security definer set search_path = '' as $$
   select coalesce(
     exists (
-      select 1 from public.allowed_emails
-      where email = lower(auth.jwt() ->> 'email')
+      select 1
+      from auth.users u
+      join public.allowed_emails a on a.email = lower(u.email)
+      where u.id = auth.uid()
+        and u.email_confirmed_at is not null
     ), false)
 $$;
 revoke execute on function public.is_allowed() from public, anon;
