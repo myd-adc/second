@@ -3,6 +3,7 @@ import {
   eventFromRow,
   hoursFromRows,
   hoursToRows,
+  mergeEventsByDate,
   ruleFromRow,
   ruleToRow,
   storeInputToPayload,
@@ -173,5 +174,24 @@ describe("storeInputToPayload", () => {
   });
   it("passes id through", () => {
     expect(storeInputToPayload({ id: "abc", name: "S", hours: [], rules: [] }).id).toBe("abc");
+  });
+});
+
+describe("mergeEventsByDate", () => {
+  const e = (date: string, happened: boolean) => ({ date, happened });
+  it("two true on one date -> one true", () => {
+    expect(mergeEventsByDate([e("2026-10-02", true), e("2026-10-02", true)])).toEqual([e("2026-10-02", true)]);
+  });
+  it("true + false -> true (either order)", () => {
+    expect(mergeEventsByDate([e("2026-10-02", false), e("2026-10-02", true)])).toEqual([e("2026-10-02", true)]);
+    expect(mergeEventsByDate([e("2026-10-02", true), e("2026-10-02", false)])).toEqual([e("2026-10-02", true)]);
+  });
+  it("false + false -> false", () => {
+    expect(mergeEventsByDate([e("2026-10-02", false), e("2026-10-02", false)])).toEqual([e("2026-10-02", false)]);
+  });
+  it("preserves newest-first order of first appearance", () => {
+    expect(
+      mergeEventsByDate([e("2026-10-03", false), e("2026-10-02", true), e("2026-10-03", true), e("2026-10-01", false)]),
+    ).toEqual([e("2026-10-03", true), e("2026-10-02", true), e("2026-10-01", false)]);
   });
 });

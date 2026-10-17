@@ -24,4 +24,11 @@ describe("predictIrregular", () => {
     // intervals 7, 8 -> 7.5 -> 8
     expect(predictIrregular([ev("2026-09-01"), ev("2026-09-08"), ev("2026-09-16")], "2026-09-17")).toBe("2026-09-24");
   });
+  it("dedupes repeated dates before computing intervals", () => {
+    expect(
+      predictIrregular([ev("2026-09-01"), ev("2026-09-08"), ev("2026-09-08"), ev("2026-09-15")], "2026-09-16"),
+    ).toBe("2026-09-22");
+    // only 2 distinct dates -> not enough facts
+    expect(predictIrregular([ev("2026-09-01"), ev("2026-09-08"), ev("2026-09-08")], "2026-09-16")).toBeNull();
+  });
 });

@@ -113,3 +113,14 @@ export function storeInputToPayload(input: StoreInput) {
     rules: input.rules.map(ruleToRow),
   };
 }
+
+/** One event per date (happened = any report true); keeps the order of first appearance. */
+export function mergeEventsByDate(events: DeliveryEvent[]): DeliveryEvent[] {
+  const byDate = new Map<ISODate, DeliveryEvent>();
+  for (const e of events) {
+    const prev = byDate.get(e.date);
+    if (prev) prev.happened = prev.happened || e.happened;
+    else byDate.set(e.date, { date: e.date, happened: e.happened });
+  }
+  return [...byDate.values()];
+}

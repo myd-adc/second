@@ -2,9 +2,7 @@ import { addDays, daysBetween } from "./dates";
 import type { DeliveryEvent, ISODate } from "./types";
 
 export function predictIrregular(events: DeliveryEvent[], from: ISODate): ISODate | null {
-  const facts = events
-    .filter((e) => e.happened)
-    .map((e) => e.date)
+  const facts = [...new Set(events.filter((e) => e.happened).map((e) => e.date))]
     .sort()
     .slice(-5);
   if (facts.length < 3) return null;
