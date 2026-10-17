@@ -20,6 +20,9 @@ export async function signInWithEmail(_prev: LoginState, formData: FormData): Pr
     email,
     options: { emailRedirectTo: `${origin}/auth/callback` },
   });
-  if (error) return { status: "error", message: error.message };
+  if (error) {
+    console.error("signInWithOtp failed:", error);
+    return { status: "error", message: "Не вдалося надіслати посилання. Спробуй ще раз трохи пізніше." };
+  }
   return { status: "sent" };
 }
