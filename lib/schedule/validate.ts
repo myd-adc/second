@@ -27,8 +27,9 @@ export function validateRule(input: unknown): RuleResult {
       return { ok: true, rule: { kind: "weekly", weekday: o.weekday } };
     case "every_n_weeks": {
       if (!isWeekday(o.weekday)) return fail("Некоректний день тижня");
-      if (!Number.isInteger(o.intervalWeeks) || (o.intervalWeeks as number) < 2)
-        return fail("Інтервал має бути цілим числом не менше 2 тижнів");
+      // upper bound: fetchEvents' history window must cover 5 occurrences (5 x 8 weeks), and keeps the smallint column safe
+      if (!Number.isInteger(o.intervalWeeks) || (o.intervalWeeks as number) < 2 || (o.intervalWeeks as number) > 8)
+        return fail("Інтервал має бути цілим числом від 2 до 8 тижнів");
       if (typeof o.anchorDate !== "string" || !isRealDate(o.anchorDate))
         return fail("Вкажи коректну опорну дату");
       if (weekdayOf(o.anchorDate) !== o.weekday)

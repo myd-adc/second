@@ -5,10 +5,11 @@ import { getDb, unwrap, type Db } from "./client";
 import { eventFromRow, journalEntryFromRow, mergeEventsByDate, type DbEventRow, type DbJournalRow } from "./mappers";
 import type { JournalEntry } from "./types";
 
-const WINDOW_DAYS = 200;
+// confidence looks at the last 5 occurrences: 5 x 8 weeks (the max every_n_weeks interval) x 7 days = 280, plus slack
+const WINDOW_DAYS = 300;
 const PAGE = 1000; // PostgREST caps a response at 1000 rows by default
 
-/** Events of the last 200 days per store (one per date), newest first, uncapped (paged to dodge the row limit). */
+/** Events of the last 300 days per store (one per date), newest first, uncapped (paged to dodge the row limit). */
 export async function fetchEvents(db: Db, storeIds: string[]): Promise<Map<string, DeliveryEvent[]>> {
   const out = new Map<string, DeliveryEvent[]>();
   if (storeIds.length === 0) return out;

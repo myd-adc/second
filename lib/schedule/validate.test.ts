@@ -27,6 +27,10 @@ describe("validateRule valid", () => {
     expect(validateRule({ kind: "irregular" })).toEqual({ ok: true, rule: { kind: "irregular" } });
     expect(validateRule({ kind: "irregular", weekday: null })).toEqual({ ok: true, rule: { kind: "irregular" } });
   });
+  it("intervalWeeks 8 is the upper bound", () => {
+    const r = validateRule({ kind: "every_n_weeks", weekday: 2, intervalWeeks: 8, anchorDate: "2026-10-14" });
+    expect(r.ok).toBe(true);
+  });
   it("strips unknown fields", () => {
     expect(validateRule({ kind: "weekly", weekday: 1, evil: 1, nth: 3 })).toEqual({
       ok: true,
@@ -53,6 +57,8 @@ describe("validateRule rejects", () => {
   });
   it("interval_weeks < 2", () =>
     bad({ kind: "every_n_weeks", weekday: 2, intervalWeeks: 1, anchorDate: "2026-10-14" }));
+  it("intervalWeeks 9", () =>
+    bad({ kind: "every_n_weeks", weekday: 2, intervalWeeks: 9, anchorDate: "2026-10-14" }));
   it("intervalWeeks 1.5", () =>
     bad({ kind: "every_n_weeks", weekday: 2, intervalWeeks: 1.5, anchorDate: "2026-10-14" }));
   it("missing anchor", () => bad({ kind: "every_n_weeks", weekday: 2, intervalWeeks: 2 }));
