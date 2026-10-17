@@ -550,3 +550,64 @@ h2 {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* map picker / viewer */
+.map {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.map-pin span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 0 3px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--accent, #2563eb);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  transform: rotate(-45deg);
+}
+
+.location {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.location legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.geo-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.geo-result {
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

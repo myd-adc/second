@@ -4,6 +4,7 @@ import { useActionState, useId, useState } from "react";
 import { weekdayOf } from "@/lib/schedule/dates";
 import type { ISODate } from "@/lib/schedule/types";
 import { saveStoreAction, type ActionResult } from "../actions";
+import LocationPicker from "./LocationPicker";
 import {
   emptyFormState,
   newRuleState,
@@ -190,6 +191,12 @@ export default function StoreForm({ initial, today }: { initial?: FormState; tod
           onChange={(e) => patch({ address: e.target.value })}
         />
       </div>
+
+      <LocationPicker
+        address={state.address}
+        coordinates={state.coordinates}
+        onChange={(coordinates) => patch({ coordinates })}
+      />
       <div className="field">
         <label htmlFor={`${uid}-notes`}>Нотатки</label>
         <textarea
@@ -199,20 +206,6 @@ export default function StoreForm({ initial, today }: { initial?: FormState; tod
           value={state.notes}
           onChange={(e) => patch({ notes: e.target.value })}
         />
-      </div>
-
-      <div className="field">
-        <label htmlFor={`${uid}-coords`}>Координати (широта, довгота)</label>
-        <input
-          id={`${uid}-coords`}
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          placeholder="50.4501, 30.5234"
-          value={state.coordinates}
-          onChange={(e) => patch({ coordinates: e.target.value })}
-        />
-        <span className="row-meta">Скопіюй з Google Maps: довгий тап по точці</span>
       </div>
 
       <h2>Години роботи</h2>

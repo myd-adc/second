@@ -1,3 +1,4 @@
+import LeafletMap from "@/app/_components/LeafletMap";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deliveryBadge } from "@/app/_components/deliveryBadge";
@@ -42,6 +43,19 @@ export default async function StorePage({ params }: { params: Promise<{ id: stri
       <h1>{store.name}</h1>
       {store.address && <p className="meta">{store.address}</p>}
       {store.notes && <p className="meta">{store.notes}</p>}
+      {store.lat !== null && store.lng !== null && (
+        <section className="card" aria-label="Карта">
+          <LeafletMap lat={store.lat} lng={store.lng} label={`Карта: ${store.name}`} height={200} />
+          <a
+            className="btn"
+            href={`https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Відкрити в картах
+          </a>
+        </section>
+      )}
 
       <section className="card" aria-label="Статус">
         <div className="row-head">
