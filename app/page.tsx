@@ -2,6 +2,8 @@ import Link from "next/link";
 import { listStores } from "@/lib/db/stores";
 import { buildOverview } from "@/lib/schedule/overview";
 import { formatTodayHeader } from "@/lib/schedule/today";
+import GeoButton from "./_components/GeoButton";
+import GeoProvider from "./_components/GeoProvider";
 import StoreRow from "./_components/StoreRow";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +23,14 @@ export default async function Home() {
           </Link>
         </div>
       ) : (
-        <ul className="list">
-          {overview.map((s) => (
-            <StoreRow key={s.id} store={s} />
-          ))}
-        </ul>
+        <GeoProvider>
+          <GeoButton />
+          <ul className="list">
+            {overview.map((s) => (
+              <StoreRow key={s.id} store={s} />
+            ))}
+          </ul>
+        </GeoProvider>
       )}
       <nav className="foot">
         <Link href="/stores" className="btn">

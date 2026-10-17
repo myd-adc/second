@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { StoreOverview } from "@/lib/schedule/overview";
+import Distance from "./Distance";
 import { deliveryBadge } from "./deliveryBadge";
 
 export default function StoreRow({ store }: { store: StoreOverview }) {
@@ -16,6 +17,7 @@ export default function StoreRow({ store }: { store: StoreOverview }) {
           {store.openNow && store.closesAt ? `відкрито до ${store.closesAt}` : "зараз закрито"}
         </span>
         <span className="row-meta">{store.ruleLabel}</span>
+        <Distance lat={store.lat} lng={store.lng} />
         {c?.stale && <span className="warn">дані застаріли</span>}
         {c && c.total > 0 && (
           <span className="row-meta">
