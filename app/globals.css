@@ -611,3 +611,85 @@ h2 {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* list / map tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tab[aria-current="page"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+/* stores map: status dots */
+.map-stores {
+  height: min(65vh, 520px);
+  margin-bottom: 12px;
+}
+
+.map-dot span {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 3px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.55);
+}
+
+.map-dot-open span {
+  background: #0b6e4f;
+}
+
+.map-dot-closed span {
+  background: #8a8f94;
+}
+
+.map-dot-today span {
+  box-shadow:
+    0 0 0 3px #f59e0b,
+    0 1px 4px rgb(0 0 0 / 0.55);
+}
+
+.map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 170px;
+  color: #1a1a1a;
+}
+
+.map-popup-meta {
+  color: #5f6368;
+  font-size: 0.85rem;
+}
+
+.map-popup-today {
+  color: #9a5b00;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.map-popup-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: #0b6e4f;
+}
