@@ -51,6 +51,14 @@ describe("buildOverview", () => {
     ]);
   });
 
+  it("passes lat/lng through from the store", () => {
+    const a = { ...store("A", []), lat: 50.45, lng: 30.52 };
+    const [withCoords] = buildOverview([a], NOW);
+    expect([withCoords.lat, withCoords.lng]).toEqual([50.45, 30.52]);
+    const [without] = buildOverview([store("B", [])], NOW);
+    expect([without.lat, without.lng]).toEqual([null, null]);
+  });
+
   it("store with no rules and no events does not throw", () => {
     const [o] = buildOverview([store("A", [])], NOW);
     expect(o.nextDelivery).toBeNull();

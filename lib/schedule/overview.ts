@@ -10,6 +10,8 @@ import type { ISODate, Rule } from "./types";
 export type StoreOverview = {
   id: string;
   name: string;
+  lat: number | null;
+  lng: number | null;
   nextDelivery: ISODate | null;
   daysUntil: number | null;
   openNow: boolean;
@@ -59,6 +61,8 @@ function overviewOf(store: StoreWithDetails, now: Date, today: ISODate): StoreOv
   return {
     id: store.id,
     name: store.name,
+    lat: store.lat,
+    lng: store.lng,
     nextDelivery,
     daysUntil: nextDelivery === null ? null : daysBetween(today, nextDelivery),
     openNow: isOpenAt(store.hours, now),
