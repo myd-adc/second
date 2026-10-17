@@ -3,8 +3,8 @@ import "./globals.css";
 import OfflineBanner from "./_components/OfflineBanner";
 
 export const metadata: Metadata = {
-  title: "Second-hand tracker",
-  description: "Трекер поставок секонд-хенду",
+  title: "Завози в секондах",
+  description: "Трекер завозів у секонд-хендах",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -58,9 +58,14 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/auth" || pathname.startsWith("/auth/")) return response;
 
   const { data: allowed, error } = await supabase.rpc("is_allowed");
-  const isAllowed = !error && allowed === true;
+  if (error) {
+    // transient outage: do NOT claim «немає в списку доступу» to an allowed user; let the page's own
+    // data load fail into the error boundary (an honest error screen)
+    console.error("proxy: is_allowed rpc failed", error);
+    return response;
+  }
 
-  if (!isAllowed) {
+  if (allowed !== true) {
     return pathname === "/no-access" ? response : redirectTo("/no-access");
   }
   if (pathname === "/login" || pathname === "/no-access") return redirectTo("/");
