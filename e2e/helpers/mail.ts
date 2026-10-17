@@ -15,8 +15,8 @@ export async function clearMailbox(email: string): Promise<void> {
   await fetch(`${MAIL_API}/api/v1/search?query=${q}`, { method: "DELETE" });
 }
 
-/** Poll Mailpit until a message to `email` arrives; return the magic link found in it. */
-export async function waitForMagicLink(email: string, timeoutMs = 20_000): Promise<string> {
+/** Poll Mailpit until a message to `email` arrives; return its HTML + text body. */
+async function waitForMessageBody(email: string, timeoutMs: number): Promise<string> {
   const q = encodeURIComponent(`to:${email}`);
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -24,11 +24,25 @@ export async function waitForMagicLink(email: string, timeoutMs = 20_000): Promi
     if (messages.length > 0) {
       const newest = [...messages].sort((a, b) => b.Created.localeCompare(a.Created))[0];
       const msg = await getJson<{ HTML: string; Text: string }>(`/api/v1/message/${newest.ID}`);
-      const body = `${msg.HTML}\n${msg.Text}`;
-      const m = body.match(/href="([^"]*\/auth\/v1\/verify[^"]*)"/) ?? body.match(/(http[^\s"<]*\/auth\/v1\/verify[^\s"<]*)/);
-      if (m) return m[1].replace(/&amp;/g, "&");
+      return `${msg.HTML}\n${msg.Text}`;
     }
     await new Promise((r) => setTimeout(r, 300));
   }
-  throw new Error(`No magic link for ${email} within ${timeoutMs} ms`);
+  throw new Error(`No mail for ${email} within ${timeoutMs} ms`);
+}
+
+/** Poll Mailpit until a message to `email` arrives; return the magic link found in it. */
+export async function waitForMagicLink(email: string, timeoutMs = 20_000): Promise<string> {
+  const body = await waitForMessageBody(email, timeoutMs);
+  const m = body.match(/href="([^"]*\/auth\/v1\/verify[^"]*)"/) ?? body.match(/(http[^\s"<]*\/auth\/v1\/verify[^\s"<]*)/);
+  if (!m) throw new Error(`No magic link in the mail for ${email}`);
+  return m[1].replace(/&amp;/g, "&");
+}
+
+/** Same, but returns the 6-digit login code (the template renders it as a standalone number). */
+export async function waitForOtpCode(email: string, timeoutMs = 20_000): Promise<string> {
+  const body = await waitForMessageBody(email, timeoutMs);
+  const m = body.match(/>\s*(\d{6})\s*</) ?? body.match(/(?<![\d#%])(\d{6})(?!\d)/);
+  if (!m) throw new Error(`No 6-digit code in the mail for ${email}`);
+  return m[1];
 }

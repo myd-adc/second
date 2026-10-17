@@ -9,7 +9,7 @@ export default async function LoginPage({
   return (
     <main>
       <h1>Вхід</h1>
-      {error && <p role="alert">Не вдалося увійти. Спробуй ще раз.</p>}
+      {error && <p role="alert">Не вдалося увійти. Спробуй ще раз. Якщо відкриваєш лист в іншій програмі — введи код з листа.</p>}
       <LoginForm />
     </main>
   );

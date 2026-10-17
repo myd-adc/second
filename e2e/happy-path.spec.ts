@@ -49,6 +49,13 @@ test("log in, create a store, mark a delivery twice, see it on the home page", a
 
     await page.goto("/");
     await expect(page.getByText(name)).toBeVisible();
+
+    // undo the mark: two-step «Скасувати» removes the own entry from the journal
+    await page.goto(storeUrl);
+    await page.getByRole("button", { name: "Скасувати" }).click();
+    await page.getByRole("button", { name: "Точно скасувати?" }).click();
+    await expect(page.getByText("ще немає відміток")).toBeVisible();
+    await expect(page.locator("ul.journal li")).toHaveCount(0);
   } finally {
     // clean up through the UI so the suite is re-runnable against the same DB
     await page.goto(`${storeUrl}/edit`);
